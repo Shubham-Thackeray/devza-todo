@@ -1,0 +1,265 @@
+<!-- header section --TODO make a component -->
+
+<nav class="navbar navbar-expand-sm navbar-dark container">
+  <a class="navbar-brand" href="#">
+    <img src="../assets/devza-light.png" alt="Logo" style="width: 40px" />
+  </a>
+
+  <ul class="navbar-nav ml-auto ai-c p-10">
+    <li class="mr-10">
+      <form class="wrapper-mat-field">
+        <mat-form-field appearance="outline" class="">
+          <mat-label>Search</mat-label>
+          <input matInput placeholder="search"  [formControl]="control">
+          <mat-icon class="edit-ico" matSuffix>search</mat-icon>
+
+        </mat-form-field>
+        </form>
+    </li>
+    <li class="nav-item end">
+      <button class="btn btn-sm btn-primary" (click)="addTask()">
+        Add Task
+      </button>
+    </li>
+  </ul>
+</nav>
+
+<div class="container">
+  <div class="row">
+    <div
+      cdkDropList
+      [cdkDropListConnectedTo]="[mediumList, highList]"
+      #lowList="cdkDropList"
+      [cdkDropListData]="todos.low"
+      class="example-list col-4"
+      (cdkDropListDropped)="drop($event)"
+    >
+    <div class="ta-center"><span class="dot green"></span></div>
+
+      <div *ngFor="let todo of todos.low" class="todo-card" cdkDrag>
+        <div class="row">
+          <div class="message col-10">
+            {{ todo?.message }}
+          </div>
+          <div class="priority col-2">
+            <mat-icon (click)="edit(todo)" class="edit-ico">mode_edit</mat-icon>
+
+          </div>
+        </div>
+        <div class="row">
+          <!-- <div class="due-date col-6">
+            Due Date: {{todo?.due_date | date}}
+            </div> -->
+          <div class="due-date col-6">from: {{ todo?.created_on | date }}</div>
+        </div>
+        <div class="row">
+          <div class="due-date col-6">
+            <!-- Due Date: {{todo?.due_date | date}} -->
+          </div>
+          <div
+            *ngIf="todo?.assigned_to && !(users && users.length == 0)"
+            class="due-date col-6"
+          >
+            <img
+              class="avatar"
+              src="{{mapImage(todo)}}"
+            />{{ todo?.assigned_name }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      cdkDropList
+      [cdkDropListConnectedTo]="[lowList, highList]"
+      #mediumList="cdkDropList"
+      [cdkDropListData]="todos.medium"
+      class="example-list col-4"
+      (cdkDropListDropped)="drop($event)"
+    >
+    <div class="ta-center"><span class="dot yellow"></span></div>
+
+    <!-- <div class="ta-center">Medium</div> -->
+      <div *ngFor="let todo of todos.medium" class="todo-card" cdkDrag>
+        <div class="row">
+          <div class="message col-10">
+            {{ todo?.message }}
+          </div>
+          <div class="priority col-2">
+            <mat-icon (click)="edit(todo)" class="edit-ico">mode_edit</mat-icon>
+
+    
+          </div>
+        </div>
+        <div class="row">
+  
+          <div class="due-date col-6">from: {{ todo?.created_on | date }}</div>
+        </div>
+        <div class="row">
+          <div class="due-date col-6">
+            <!-- Due Date: {{todo?.due_date | date}} -->
+          </div>
+          <div
+            *ngIf="todo?.assigned_to"
+            class="due-date col-6"
+          >
+            <img
+              class="avatar"
+              src="{{mapImage(todo)}}"
+            />{{ todo?.assigned_name }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      cdkDropList
+      #highList="cdkDropList"
+      [cdkDropListConnectedTo]="[lowList, mediumList]"
+      [cdkDropListData]="todos.high"
+      class="example-list col-4"
+      (cdkDropListDropped)="drop($event)"
+    >
+    <div class="ta-center"><span class="dot red"></span></div>
+
+
+      <div *ngFor="let todo of todos.high" class="todo-card" cdkDrag>
+        <div class="row">
+          <div class="message col-10">
+            {{ todo?.message }}
+          </div>
+          <div class="priority col-2">
+            <mat-icon (click)="edit(todo)" class="edit-ico">mode_edit</mat-icon>
+          </div>
+        </div>
+        <div class="row">
+          <div class="due-date col-6">from: {{ todo?.created_on | date }}</div>
+        </div>
+        <div class="row">
+          <div class="due-date col-6"></div>
+          <div
+            *ngIf="todo?.assigned_to && !(users && users.length == 0)"
+            class="due-date col-6"
+          >
+            <img
+              class="avatar"
+              src="{{mapImage(todo)}}"
+            />{{ todo?.assigned_name }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- add/update modal -->
+
+  <ng-template #customContent let-c="close" let-d="dismiss">
+    <div class="modal-header">
+      <h4 class="modal-title">{{ type }} Task</h4>
+      <button
+        type="button"
+        class="close"
+        aria-label="Close"
+        (click)="d('Cross click')"
+      >
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form [formGroup]="formTask">
+        <div class="row m-tb-15">
+          <div class="col-6">
+            <mat-form-field class="full-width">
+              <mat-label>Task</mat-label>
+              <input matInput placeholder="Task" formControlName="message" />
+            </mat-form-field>
+          </div>
+          <div class="col-6">
+            <mat-form-field appearance="fill" class="full-width">
+              <mat-label>Due Date</mat-label>
+              <input
+                matInput
+                [matDatepicker]="picker1"
+                formControlName="due_date"
+              />
+              <mat-datepicker-toggle
+                matSuffix
+                [for]="picker1"
+              ></mat-datepicker-toggle>
+              <mat-datepicker #picker1></mat-datepicker>
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="row m-tb-15">
+          <div class="col-6">
+            <mat-label>priority</mat-label>
+
+            <mat-radio-group
+              formControlName="priority"
+              aria-label="Select an option"
+              class="full-width"
+            >
+              <mat-radio-button
+                [checked]="formTask.value.priority == 1"
+                [value]="1"
+                >Low</mat-radio-button
+              >
+              <mat-radio-button
+                [checked]="formTask.value.priority == 2"
+                [value]="2"
+                >Medium</mat-radio-button
+              >
+              <mat-radio-button
+                [checked]="formTask.value.priority == 3"
+                [value]="3"
+                >High</mat-radio-button
+              >
+            </mat-radio-group>
+          </div>
+          <div class="col-6">
+            <mat-form-field appearance="fill" class="full-width">
+              <mat-label>Assign to</mat-label>
+              <mat-select formControlName="assigned_to">
+                <mat-option [value]=""> </mat-option>
+                <mat-option *ngFor="let user of users" [value]="user.id">
+                  <img class="avatar" src="{{ user?.picture }}" />{{ user?.name }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+      </form>
+
+ 
+    </div>
+
+    <div class="modal-footer">
+      <button
+        type="button"
+        [disabled]="formTask.invalid"
+        class="btn btn-raised btn-success"
+        (click)="c('Close click'); submitTask()"
+      >
+        <span *ngIf="type !== 'Edit'"> {{ type }} Task </span>
+        <span *ngIf="type === 'Edit'"> Save </span>
+        
+      </button>
+      <button
+      *ngIf="type === 'Edit'"
+      type="button"
+      [disabled]="formTask.invalid"
+      class="btn btn-raised btn-danger"
+      (click)="c('Close click'); deleteTask()"
+    >      <span > Delete </span>
+      
+    </button>
+      <button
+        type="button"
+        class="btn btn-secondary btn-raised"
+        (click)="c('Close click')"
+      >
+        Close
+      </button>
+    </div>
+  </ng-template>
+</div>
